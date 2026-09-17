@@ -65,7 +65,7 @@ func main() {
 		api.POST("/auth/login", app.Login)
 
 		api.GET("/polls/:id", app.GetPoll)
-		api.POST("/polls/:id/vote", app.CastVote)
+		
 
 		authed := api.Group("/")
 		authed.Use(middleware.AuthRequired(cfg.JWTSecret))
@@ -73,6 +73,7 @@ func main() {
 			authed.POST("polls", app.CreatePoll)
 			authed.GET("polls", app.ListMyPolls)
 			authed.PATCH("polls/:id/close", app.ClosePoll)
+			authed.POST("polls/:id/vote", app.CastVote)
 		}
 	}
 

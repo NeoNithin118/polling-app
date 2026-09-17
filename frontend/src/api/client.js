@@ -32,8 +32,12 @@ export const api = {
 
   getPoll: (id) => request(`/api/polls/${id}`),
 
-  vote: (id, optionId, voterId) =>
-    request(`/api/polls/${id}/vote`, { method: 'POST', body: { optionId, voterId } }),
+  vote: (id, optionId, token) =>
+    request(`/api/polls/${id}/vote`, {
+      method: 'POST',
+      body: { optionId },
+      token
+    }),
 
   closePoll: (id, token) =>
     request(`/api/polls/${id}/close`, { method: 'PATCH', token }),

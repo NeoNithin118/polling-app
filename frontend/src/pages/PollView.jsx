@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { api, WS_URL } from '../api/client.js'
-import { getVoterId, useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 import OptionBar from '../components/OptionBar.jsx'
 import PulseDot from '../components/PulseDot.jsx'
 
@@ -11,6 +11,7 @@ function votedKey(pollId) {
 
 export default function PollView() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { user, token } = useAuth()
   const [poll, setPoll] = useState(null)
   const [counts, setCounts] = useState({})
@@ -66,12 +67,23 @@ export default function PollView() {
 
   async function handleVote(optionId) {
     if (votedOption || voting) return
+  
+    // User must be logged in to vote.
+    // The poll itself remains publicly viewable.
+    if (!token) {
+      navigate(`/login?returnTo=/poll/${id}`)
+      return
+    }
+  
     setVoting(true)
     setError('')
+  
     try {
-      const data = await api.vote(id, optionId, getVoterId())
+      const data = await api.vote(id, optionId, token)
+  
       setCounts(data.counts)
       setTotal(data.total)
+  
       localStorage.setItem(votedKey(id), optionId)
       setVotedOption(optionId)
     } catch (err) {

@@ -42,14 +42,3 @@ export function useAuth() {
   return ctx
 }
 
-// A stable anonymous voter id, separate from account auth, so votes
-// can be deduped per-browser even for people who never sign up (only
-// poll creators need an account — voting stays open).
-export function getVoterId() {
-  let id = localStorage.getItem('signal_voter_id')
-  if (!id) {
-    id = crypto.randomUUID()
-    localStorage.setItem('signal_voter_id', id)
-  }
-  return id
-}

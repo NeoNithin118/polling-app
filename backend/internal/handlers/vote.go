@@ -13,11 +13,11 @@ import (
 	"github.com/guvi-internship/polling-backend/internal/db"
 	"github.com/guvi-internship/polling-backend/internal/models"
 	"github.com/guvi-internship/polling-backend/internal/ws"
+	"github.com/guvi-internship/polling-backend/internal/middleware"
 )
 
 type voteRequest struct {
 	OptionID string `json:"optionId" binding:"required"`
-	VoterID  string `json:"voterId" binding:"required"` // client-generated, persisted in localStorage
 }
 
 // CastVote is the hot path of the whole app. Every check here is
@@ -35,7 +35,7 @@ func (a *App) CastVote(c *gin.Context) {
 
 	var req voteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "optionId and voterId are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "optionId is required"})	
 		return
 	}
 
@@ -72,7 +72,8 @@ func (a *App) CastVote(c *gin.Context) {
 	// Fingerprint = client-supplied voterId, tied to IP as a weak
 	// secondary signal. This is not bulletproof (nothing anonymous is)
 	// but it stops casual double-voting, which is what the brief asks for.
-	fingerprint := req.VoterID + "|" + c.ClientIP()
+	userID := middleware.UserID(c)
+	fingerprint := userID
 
 	added, err := a.Redis.SAdd(ctx, db.VotersKey(pollID), fingerprint).Result()
 	if err != nil {

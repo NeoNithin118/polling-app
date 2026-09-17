@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -11,6 +11,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const returnTo = searchParams.get('returnTo')
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -25,7 +27,7 @@ export default function Signup() {
     try {
       const data = await api.signup(name, email, password)
       login(data.token, data.user)
-      navigate('/dashboard')
+      navigate(returnTo || '/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -37,7 +39,9 @@ export default function Signup() {
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Create an account</h1>
-        <p className="auth-subtitle">Only poll creators need to sign up — voting stays open to anyone with the link.</p>
+        <p className="auth-subtitle">
+          Create an account to manage polls and vote.
+        </p>
 
         {error && <div className="form-error">{error}</div>}
 
