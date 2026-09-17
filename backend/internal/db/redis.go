@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"crypto/tls"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -12,6 +13,9 @@ func ConnectRedis(addr, password string, dbIndex int) (*redis.Client, error) {
 		Addr:     addr,
 		Password: password,
 		DB:       dbIndex,
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -37,7 +41,4 @@ func Channel(pollID string) string {
 	return "channel:poll:" + pollID
 }
 
-// ChannelPattern is used by the WebSocket hub to subscribe to every
-// poll's channel with a single PSubscribe call instead of one
-// subscription per poll.
 const ChannelPattern = "channel:poll:*"
